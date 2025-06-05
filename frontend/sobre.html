@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="./styles/output.css">
+    <title>Encomendas</title>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <style>
+    /* Configure a cor pink personalizada */
+    @layer utilities {
+    .bg-pink-strong { background-color: #FF90C9; }
+    .text-blue-brand { color: #5B5ADE; }
+    .bg-blue-brand {color: #5B5ADE;}
+    .btn-blue-brand { @apply bg-blue-500 text-white hover:bg-blue-600; }
+    .input-pill { @apply border border-pink-200 rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300; }
+    }
+</style>
+
+<!-- Cabeçalho (header) -->
+<header class="bg-pink-strong">
+    <div class="container mx-auto flex flex-wrap justify-between items-center p-4">
+    <div class="text-blue-brand font-bold text-xl">
+        swiftlogix
+    </div>
+    <nav>
+        <ul class="flex space-x-4 text-blue-brand">
+        <li><a href="#" class=" hover:underline">Página Inicial</a></li>
+        <li><a href="#" class=" hover:underline">Rastreamento</a></li>
+        <li><a href="#" class=" hover:underline">Sobre Nós</a></li>
+        </ul>
+</nav>
+
+<a href="login.html" class="border-b-4 font-medium overflow-hidden relative px-4 py-2 rounded-md hover:brightness-150 hover:border-t-4 hover:border-b active:opacity-75 outline-none duration-300 group">
+  <span class="absolute -top-[150%] left-0 inline-flex w-80 h-[5px] rounded-md opacity-50 group-hover:top-[150%] duration-500 shadow-[0_0_10px_10px_rgba(0,0,0,0.3)]"></span>
+  Login
+</a>
+
+
+    </div>
+</header>
+
+<!-- Conteúdo principal (main) -->
+<main class="flex-grow container mx-auto px-4 py-10">
+    <div class="flex flex-col lg:flex-row items-center">
+<!-- Texto de apresentação -->
+    <div class="lg:w-1/2">
+        <h1 class="text-3xl md:text-5xl font-bold text-blue-brand">
+        Sobre nós 
+        </h1>
+        <p class="mt-4 text-gray-700">
+       Lorem ipsum dolor sit amet consectetur adipisicing elit. In, nesciunt nisi cum blanditiis nulla, perspiciatis corporis deleniti quos omnis quasi expedita esse optio temporibus minima ea repudiandae nihil architecto veniam.
+        </p>
+        <div class="mt-6">
+        <!-- From Uiverse.io by themrsami --> 
+<div class="container px-4 mx-auto">
+  <div class="mx-auto">
+    <div class="max-w-md  px-8 py-6 bg-gray-100 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">Fale conosco</h2>
+      <form>
+        <div class="mb-4">
+          <label class="block text-gray-800 mb-1" for="name">Seu Nome</label>
+          <input
+            class="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition duration-300"
+            placeholder="Nome"
+            type="text"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-800 mb-1" for="email">Seu email</label>
+          <input
+            class="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition duration-300"
+            placeholder="Email"
+            name="email"
+            id="email"
+            type="email"
+          />
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-800 mb-1" for="message"
+            >Sua mensagem</label
+          >
+          <textarea
+            class="w-full px-4 py-2 bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-300 transition duration-300"
+            rows="4"
+            placeholder="Insira sua mensagem"
+            name="message"
+            id="message"
+          ></textarea>
+        </div>
+        <button
+          class="w-full bg-pink-300 text-gray-800 py-2 px-4 rounded-lg hover:bg-pink-600 transition duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+          type="submit"
+        >
+            Enviar mensagem
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+        </div>
+    </div>
+   
+</main>
+
+<!-- Rodapé (footer) -->
+<footer class="bg-pink-strong text-blue-brand">    <div class="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 py-8 px-4">
+    <div>
+        <h3 class="text-xl font-bold">swiftlogix</h3>
+        <p class="mt-2 text-gray-800">
+        Excelência e cuidado como é importante para você!
+        </p>
+    </div>
+    <div>
+        <h4 class="font-semibold">Suporte</h4>
+        <ul class="mt-2 space-y-1">
+        <li><a href="#" class="hover:underline">Getting Started</a></li>
+        <li><a href="#" class="hover:underline">FAQs</a></li>
+        <li><a href="#" class="hover:underline">Help Articles</a></li>
+        </ul>
+    </div>
+    <div>
+        <h4 class="font-semibold">Legal</h4>
+        <ul class="mt-2 space-y-1">
+        <li><a href="#" class="hover:underline">Terms &amp; Conditions</a></li>
+        <li><a href="#" class="hover:underline">Privacy Policy</a></li>
+        </ul>
+    </div>
+    <div>
+        <h4 class="font-semibold">Serviços</h4>
+        <ul class="mt-2 space-y-1">
+        <li><a href="#" class="hover:underline">Shipment Tracking</a></li>
+        <li><a href="#" class="hover:underline">Route Optimization</a></li>
+        <li><a href="#" class="hover:underline">Inventory Management</a></li>
+        <li><a href="#" class="hover:underline">Freight Management</a></li>
+        <li><a href="#" class="hover:underline">Real-Time Analytics</a></li>
+        </ul>
+    </div>
+    </div>
+    <div class="border-t border-purple-600 mt-4 pt-4 text-center pb-4">
+
+   
+    <p class="mt-2">Swiftlogix 2025 © Todos os direitos reservados.</p>
+    </div>
+</footer>
+
+</body>
+</html>

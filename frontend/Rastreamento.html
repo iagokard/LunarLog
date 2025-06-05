@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreamento de Encomendas</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <link rel="stylesheet" href="./styles/output.css">
+
+    <style>
+        /* Definições de cores personalizadas e componentes via @layer para Tailwind */
+        @layer utilities {
+            .bg-pink-strong { background-color: #FF90C9; } /* Rosa forte personalizado */
+            .text-blue-brand { color: #5B5ADE; } /* Azul marca personalizado */
+            .bg-blue-brand { background-color: #5B5ADE; } /* Fundo azul marca */
+            .border-blue-brand { border-color: #5B5ADE; }
+            .ring-blue-brand { --tw-ring-color: #5B5ADE; }
+
+            .text-pink-brand { color: #FF90C9;}
+            .border-pink-brand { border-color: #FF90C9; }
+            .ring-pink-brand { --tw-ring-color: #FF90C9; }
+
+            /* Estilos base para botões Gemini para consistência */
+            .gemini-button-base {
+                @apply text-white px-4 py-2 rounded-md text-sm font-medium transition-colors duration-150 ease-in-out flex items-center justify-center space-x-2;
+            }
+            .gemini-button-base:disabled {
+                @apply bg-gray-400 cursor-not-allowed;
+            }
+            .gemini-button-blue {
+                @apply gemini-button-base bg-blue-brand hover:bg-opacity-80;
+            }
+            .gemini-button-pink {
+                @apply gemini-button-base bg-pink-strong hover:bg-opacity-80;
+            }
+        }
+
+        /* Estilo para o spinner de carregamento */
+        .loader {
+            border: 4px solid #f3f3f3; /* Cinza claro */
+            border-top: 4px solid #5B5ADE; /* Azul da marca */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0.5rem auto; /* Centralizar e adicionar margem */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Melhorando a aparência da área de explicação do Gemini */
+        #geminiResponseArea {
+            white-space: pre-wrap; /* Preserva quebras de linha e espaços */
+            background-color: #E9E7FD; /* Lilás bem clarinho */
+            border-left: 4px solid #5B5ADE; /* Borda azul da marca */
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.375rem; /* md */
+            color: #374151; /* Cinza escuro para o texto */
+            font-size: 0.875rem; /* sm */
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body class="bg-purple-100 flex flex-col min-h-screen text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-6 space-y-8">
+
+        <header class="text-center my-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-brand">Acompanhe o seu pedido!</h1>
+            <p class="text-md md:text-lg mt-2 text-gray-600">Administre as suas encomendas com o rastreamento em tempo real.</p>
+        </header>
+
+        <div class="flex justify-center items-center gap-2 mb-8">
+            <div class="flex items-center bg-white border border-pink-brand rounded-full shadow-md px-4 py-2 w-full max-w-md">
+                <span class="text-pink-brand text-xl mr-3">
+                    <i class="fas fa-shipping-fast"></i>
+                </span>
+                <input id="codigoProdutoInput" type="text" placeholder="Digite o Código do Produto"
+                       class="bg-transparent focus:outline-none text-sm text-gray-700 flex-grow"/>
+                <button id="limparCodigoBtn" title="Limpar código">
+                    <i class="fas fa-times text-gray-400 hover:text-gray-600 text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg max-w-lg mx-auto border border-pink-brand">
+            <div id="pedidoPrincipalStatusCard" class="flex items-start gap-3">
+                <span class="text-blue-brand text-2xl pt-1">
+                    <i class="fas fa-star"></i>
+                </span>
+                <div>
+                    <h2 id="pedidoPrincipalIdText" class="text-lg font-semibold text-blue-brand">Pedido #0</h2>
+                    <p id="pedidoPrincipalStatusText" class="text-sm text-gray-700">Chegou ao Centro de Coleta de Cajamar - SP.</p>
+                </div>
+            </div>
+            <div class="mt-4 space-y-2 flex flex-col items-center">
+                <button id="explainStatusButton" class="gemini-button-blue w-full md:w-auto">
+                    <i class="fas fa-magic"></i>
+                    <span>Explicar Status ✨</span>
+                </button>
+                <button id="whatToDoButton" class="gemini-button-blue w-full md:w-auto hidden">
+                    <i class="fas fa-question-circle"></i>
+                    <span>O que fazer agora? 🤔✨</span>
+                </button>
+                <button id="generateMessageButton" class="gemini-button-pink w-full md:w-auto hidden">
+                    <i class="fas fa-envelope"></i>
+                    <span>Gerar Mensagem de Contato ✨</span>
+                </button>
+            </div>
+            <div id="loadingSpinner" class="loader hidden mt-4"></div>
+            <div id="geminiResponseArea" class="hidden">
+                </div>
+        </div>
+
+
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg border border-blue-brand mt-8">
+            <h2 class="text-xl font-semibold text-blue-brand mb-1">Histórico de Rastreio</h2>
+            <h3 class="text-gray-600 font-medium mb-4 text-sm">Pedidos Recentes</h3>
+            <ul id="orderList" class="space-y-3 text-sm">
+                </ul>
+            <nav id="pagination" class="flex flex-wrap justify-center items-center mt-6 gap-2 text-sm">
+                </nav>
+        </div>
+    </div>
+
+    <section id="logistica-reversa" class="p-4 md:p-8 bg-pink-50 text-gray-700 mt-12">
+        <div class="container mx-auto">
+            <div class="mb-6 text-center">
+                <h2 class="text-3xl font-bold text-pink-brand">Logística Reversa</h2>
+                <p class="text-lg text-purple-600">Adicione e rastreie pedidos enviados por você!</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                    <form class="space-y-4">
+                        <input type="text" placeholder="Nome do destinatário" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <input type="email" placeholder="Email do destinatário" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <input type="tel" placeholder="Telefone/Celular" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <input type="text" placeholder="Endereço do destinatário" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <input type="text" placeholder="Código de Rastreio" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <input type="text" placeholder="Localização" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" />
+                        <textarea placeholder="Nota de Encomenda" class="w-full px-4 py-2 border border-pink-brand rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-pink-brand" rows="3"></textarea>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="terms" class="mr-2 h-4 w-4 text-pink-brand focus:ring-pink-brand border-gray-300 rounded">
+                            <label for="terms" class="text-sm">Aceito os termos. <a href="#" class="text-blue-brand underline hover:text-blue-700">Leia os nossos T&Cs</a>.</label>
+                        </div>
+                        <button type="submit" class="bg-pink-strong hover:bg-opacity-80 text-white px-6 py-2 rounded-lg font-semibold">Salvar</button>
+                    </form>
+                </div>
+                <div>
+                    <div class="space-y-4">
+                        <div class="border border-blue-brand rounded-lg shadow-sm">
+                            <button class="order-toggle w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 font-medium text-blue-brand rounded-t-lg">Pedido #1234 <i class="fas fa-chevron-down float-right"></i></button>
+                            <div class="order-details hidden px-4 py-3 bg-white rounded-b-lg border-t border-blue-brand">
+                                </div>
+                        </div>
+                         <div class="border border-blue-brand rounded-lg shadow-sm">
+                            <button class="order-toggle w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 font-medium text-blue-brand rounded-t-lg">Pedido #5678 <i class="fas fa-chevron-down float-right"></i></button>
+                            <div class="order-details hidden px-4 py-3 bg-white rounded-b-lg border-t border-blue-brand"></div>
+                        </div>
+                         </div>
+                    <div class="mt-6 flex justify-center space-x-1 text-sm">
+                        <button class="px-3 py-1 border rounded text-blue-brand hover:bg-blue-100 disabled:opacity-50" disabled>Anterior</button>
+                        <button class="px-3 py-1 border rounded bg-blue-brand text-white">1</button>
+                        <button class="px-3 py-1 border rounded text-blue-brand hover:bg-blue-100">2</button>
+                        <button class="px-3 py-1 border rounded text-blue-brand hover:bg-blue-100">Próxima</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="text-center p-4 mt-auto text-sm text-gray-600">
+        © 2024 Sheila Project. Todos os direitos reservados.
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // --- Lógica para "Acompanhe o seu pedido!" ---
+        const codigoProdutoInput = document.getElementById('codigoProdutoInput');
+        const limparCodigoBtn = document.getElementById('limparCodigoBtn');
+
+        const pedidoPrincipalIdTextEl = document.getElementById('pedidoPrincipalIdText');
+        const pedidoPrincipalStatusTextEl = document.getElementById('pedidoPrincipalStatusText');
+
+        const explainStatusButton = document.getElementById('explainStatusButton');
+        const whatToDoButton = document.getElementById('whatToDoButton');
+        const generateMessageButton = document.getElementById('generateMessageButton');
+
+        const geminiResponseArea = document.getElementById('geminiResponseArea');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+
+        const orderListEl = document.getElementById('orderList');
+        const paginationEl = document.getElementById('pagination');
+
+        const mockPedidos = [
+            { id: 1, status: 'Em separação no centro de distribuição.' },
+            { id: 2, status: 'Chegou ao Centro de Distribuição de Camaçari - BA.' },
+            { id: 3, status: 'Em rota de entrega para o seu endereço.' },
+            { id: 4, status: 'Finalizado: Entregue ao destinatário.' },
+            { id: 5, status: 'Finalizado: Devolvido ao remetente.' },
+            { id: 6, status: 'Aguardando postagem pelo remetente.' },
+            { id: 7, status: 'Objeto mal encaminhado, redirecionando.' },
+            { id: 8, status: 'Finalizado: Disponível para retirada.' },
+            { id: 9, status: 'Em trânsito para unidade de tratamento internacional.' },
+            { id: 10, status: 'Fiscalização aduaneira finalizada.' },
+            { id: 11, status: 'Saiu para entrega ao destinatário.' },
+            { id: 12, status: 'Tentativa de entrega não efetuada.' }
+        ];
+        const pedidosPorPagina = 5;
+        let paginaAtual = 1;
+
+        function renderizarPedidosRecentes() {
+            if (!orderListEl || !paginationEl) return;
+            orderListEl.innerHTML = '';
+            const inicio = (paginaAtual - 1) * pedidosPorPagina;
+            const fim = inicio + pedidosPorPagina;
+            const pedidosPagina = mockPedidos.slice(inicio, fim);
+
+            pedidosPagina.forEach(pedido => {
+                const item = document.createElement('li');
+                item.className = 'flex justify-between items-center bg-purple-50 border border-purple-200 p-3 rounded-md shadow-sm hover:shadow-md transition-shadow';
+                item.innerHTML = `
+                    <div>
+                        <span class="text-blue-brand font-semibold">Pedido #${pedido.id}</span>
+                        <p class="text-xs text-gray-500">${pedido.status}</p>
+                    </div>
+                    <i class="fas fa-chevron-right text-purple-400"></i>
+                `;
+                orderListEl.appendChild(item);
+            });
+            renderizarPaginacaoPedidosRecentes();
+        }
+
+        function renderizarPaginacaoPedidosRecentes() {
+            if (!paginationEl) return;
+            paginationEl.innerHTML = '';
+            const totalPaginas = Math.ceil(mockPedidos.length / pedidosPorPagina);
+
+            const criarBotaoPaginacao = (texto, pagina, desabilitado = false, ativo = false) => {
+                const btn = document.createElement('button');
+                btn.innerHTML = texto; // Permite ícones no futuro, se necessário
+                btn.disabled = desabilitado;
+                let classes = 'px-3 py-1 rounded-md border text-xs ';
+                if (desabilitado) {
+                    classes += 'bg-gray-100 text-gray-400 cursor-not-allowed border-gray-300';
+                } else if (ativo) {
+                    classes += 'bg-blue-brand text-white border-blue-brand';
+                } else {
+                    classes += 'bg-white text-blue-brand border-gray-300 hover:bg-purple-50 hover:border-blue-brand';
+                }
+                btn.className = classes;
+                btn.onclick = () => {
+                    paginaAtual = pagina;
+                    renderizarPedidosRecentes();
+                };
+                return btn;
+            };
+
+            if (totalPaginas <= 1) return; // Não renderiza paginação se não for necessária
+
+            paginationEl.appendChild(criarBotaoPaginacao('Anterior', paginaAtual - 1, paginaAtual === 1));
+
+            for (let i = 1; i <= totalPaginas; i++) {
+                paginationEl.appendChild(criarBotaoPaginacao(i.toString(), i, false, paginaAtual === i));
+            }
+            paginationEl.appendChild(criarBotaoPaginacao('Próxima', paginaAtual + 1, paginaAtual === totalPaginas));
+        }
+
+        if (limparCodigoBtn && codigoProdutoInput) {
+            limparCodigoBtn.addEventListener('click', () => {
+                codigoProdutoInput.value = '';
+                codigoProdutoInput.focus();
+            });
+        }
+
+        // Simulação de busca de pedido ao pressionar Enter
+        if (codigoProdutoInput) {
+            codigoProdutoInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Evitar submit de formulário, se houver
+                    const codigo = codigoProdutoInput.value.trim().toUpperCase();
+                    if (codigo) {
+                        // Simula a exibição de um status para o código buscado
+                        let novoStatus = "Status não encontrado para o código: " + codigo;
+                        let idPedido = codigo;
+                        let showWhatToDo = false;
+                        let showGenerateMessage = false;
+
+                        // Dados de exemplo para simulação
+                        if (codigo === "XYZ789") {
+                            novoStatus = "Objeto em trânsito - por favor aguarde.";
+                        } else if (codigo === "FAIL01") {
+                            novoStatus = "Tentativa de entrega não efetuada.";
+                            showWhatToDo = true;
+                            showGenerateMessage = true;
+                        } else if (codigo === "HELD02") {
+                            novoStatus = "Objeto retido para inspeção alfandegária.";
+                            showWhatToDo = true;
+                            showGenerateMessage = true;
+                        } else if (codigo === "DELAY03") {
+                            novoStatus = "Objeto em trânsito há muito tempo.";
+                            showWhatToDo = true;
+                            showGenerateMessage = true;
+                        } else if (codigo === "INFO04") {
+                            novoStatus = "Seu pacote está na unidade local e sairá para entrega em breve.";
+                        }
+
+
+                        if (pedidoPrincipalIdTextEl && pedidoPrincipalStatusTextEl) {
+                             pedidoPrincipalIdTextEl.innerHTML = `<i class="fas fa-star text-blue-brand mr-1"></i> Pedido #${idPedido}`;
+                             pedidoPrincipalStatusTextEl.innerText = novoStatus;
+                        }
+
+                        // Limpa e esconde a área de resposta do Gemini
+                        geminiResponseArea.classList.add('hidden');
+                        geminiResponseArea.innerHTML = '';
+
+                        // Controla a visibilidade dos botões Gemini
+                        whatToDoButton.classList.toggle('hidden', !showWhatToDo);
+                        generateMessageButton.classList.toggle('hidden', !showGenerateMessage);
+
+                        // Foco no primeiro botão Gemini visível para acessibilidade
+                        if (!explainStatusButton.classList.contains('hidden')) explainStatusButton.focus();
+                        else if (!whatToDoButton.classList.contains('hidden')) whatToDoButton.focus();
+                        else if (!generateMessageButton.classList.contains('hidden')) generateMessageButton.focus();
+
+                    } else {
+                        // Poderia mostrar um feedback mais elegante
+                        alert("Por favor, insira um código de produto.");
+                    }
+                    // Limpar input após a busca é opcional
+                    // codigoProdutoInput.value = '';
+                }
+            });
+        }
+
+        // Funções Gemini
+        async function callGeminiAPI(prompt, buttonToUpdate, originalButtonHTML) {
+            if (!geminiResponseArea || !loadingSpinner || !buttonToUpdate) return;
+
+            loadingSpinner.classList.remove('hidden');
+            geminiResponseArea.classList.add('hidden');
+            geminiResponseArea.innerHTML = '';
+            buttonToUpdate.disabled = true;
+            const currentIcon = buttonToUpdate.querySelector('i');
+            buttonToUpdate.innerHTML = `<i class="fas fa-spinner fa-spin"></i><span class="ml-2">Analisando...</span>`;
+
+            try {
+               // ATENÇÃO: A API Key deve ser manuseada com segurança.
+                // Em um ambiente de produção, NUNCA exponha sua API Key no lado do' cliente.
+                // Esta chamada deve ser feita a partir de um backend seguro.
+                // O código abaixo é apenas para fins de demonstração e não funcionará
+                // diretamente no navegador sem um proxy ou backend.
+                const apiKey = "SUA_API_KEY_GEMINI"; // SUBSTITUA OU DEIXE VAZIO SE USAR PROXY
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                if (apiKey === "SUA_API_KEY_GEMINI" || apiKey === "") {
+                     throw new Error("API Key não configurada. Configure sua API Key ou use um backend para chamadas Gemini.");
+                } 
+
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Erro da API Gemini:', errorData);
+                    throw new Error(`Erro da API (${response.status}): ${errorData?.error?.message || response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    const pElement = document.createElement('p');
+                    pElement.textContent = text;
+                    geminiResponseArea.appendChild(pElement);
+                } else {
+                    const pElement = document.createElement('p');
+                    pElement.textContent = 'Não foi possível obter uma resposta compreensível da IA no momento.';
+                    geminiResponseArea.appendChild(pElement);
+                    console.error('Resposta inesperada da API Gemini:', result);
+                }
+            } catch (error) {
+                console.error('Erro ao chamar a API Gemini:', error);
+                const pElement = document.createElement('p');
+                pElement.innerHTML = `<strong>Ocorreu um erro:</strong> ${error.message}<br><small>Verifique o console para mais detalhes. Em um app real, essa chamada deveria ser feita via backend.</small>`;
+                geminiResponseArea.appendChild(pElement);
+            } finally {
+                loadingSpinner.classList.add('hidden');
+                geminiResponseArea.classList.remove('hidden');
+                buttonToUpdate.disabled = false;
+                buttonToUpdate.innerHTML = originalButtonHTML;
+            }
+        }
+
+        if (explainStatusButton) {
+            explainStatusButton.addEventListener('click', async function () {
+                const statusAtual = pedidoPrincipalStatusTextEl.innerText;
+                const prompt = `Por favor, explique o que significa o seguinte status de rastreamento de encomenda de forma simples, clara e amigável para um cliente que está acompanhando seu pedido. Seja breve (2-3 frases) e direto ao ponto. Status: "${statusAtual}"`;
+                await callGeminiAPI(prompt, explainStatusButton, explainStatusButton.innerHTML);
+            });
+        }
+
+        if (whatToDoButton) {
+            whatToDoButton.addEventListener('click', async function() {
+                const statusAtual = pedidoPrincipalStatusTextEl.innerText;
+                const prompt = `O status atual do meu pedido é: "${statusAtual}". O que devo fazer em relação a este status? Quais são os próximos passos recomendados ou como posso obter ajuda da transportadora ou vendedor? Forneça conselhos práticos e concisos (2-4 frases).`;
+                await callGeminiAPI(prompt, whatToDoButton, whatToDoButton.innerHTML);
+            });
+        }
+
+        if (generateMessageButton) {
+            generateMessageButton.addEventListener('click', async function() {
+                const statusAtual = pedidoPrincipalStatusTextEl.innerText;
+                const pedidoIdCompleto = pedidoPrincipalIdTextEl.innerText;
+                const matchId = pedidoIdCompleto.match(/#(\S+)/);
+                const pedidoId = matchId ? matchId[1] : "não identificado";
+
+                const prompt = `Meu pedido com o código "${pedidoId}" está com o status "${statusAtual}". Por favor, gere uma mensagem curta (máximo 3-4 frases), educada e profissional que eu possa enviar ao vendedor ou à transportadora para perguntar sobre a situação e os próximos passos. Inclua o código do pedido na mensagem. Não adicione saudações como "Prezado(a)" ou despedidas como "Atenciosamente", apenas o corpo da mensagem.`;
+                await callGeminiAPI(prompt, generateMessageButton, generateMessageButton.innerHTML);
+            });
+        }
+
+        // --- Lógica para "Logística Reversa" (Accordion) ---
+        document.querySelectorAll('.order-toggle').forEach(button => {
+            button.addEventListener('click', () => {
+                const details = button.nextElementSibling;
+                const icon = button.querySelector('i.fa-chevron-down, i.fa-chevron-up');
+
+                if (details.classList.contains('hidden')) {
+                    // Simula fechamento de outros accordions abertos (opcional)
+                    document.querySelectorAll('.order-details:not(.hidden)').forEach(openDetail => {
+                        if (openDetail !== details) {
+                            openDetail.classList.add('hidden');
+                            const otherIcon = openDetail.previousElementSibling.querySelector('i');
+                            if (otherIcon) {
+                                otherIcon.classList.remove('fa-chevron-up');
+                                otherIcon.classList.add('fa-chevron-down');
+                            }
+                        }
+                    });
+
+                    details.innerHTML = '<p class="italic text-gray-500 p-2">Carregando detalhes...</p>';
+                    details.classList.remove('hidden');
+                    if (icon) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    }
+
+                    // Simula carregamento de dados
+                    setTimeout(() => {
+                        // Exemplo de conteúdo dinâmico - idealmente viria de uma API ou dados do pedido
+                        details.innerHTML = `
+                            <div class="p-3 space-y-1 text-xs">
+                                <p><strong class="font-medium">Status:</strong> <span class="text-green-600">Enviado ao destinatário</span></p>
+                                <p><strong class="font-medium">Data Postagem:</strong> 27/05/2025</p>
+                                <p><strong class="font-medium">Destinatário:</strong> João Exemplo</p>
+                                <p><strong class="font-medium">Código Rastreio:</strong> <a href="#" class="text-blue-brand underline">BR123456789XY</a></p>
+                                <p><strong class="font-medium text-pink-brand">Nota:</strong> Cliente solicitou urgência.</p>
+                            </div>
+                        `;
+                    }, 800);
+                } else {
+                    details.classList.add('hidden');
+                     if (icon) {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                }
+            });
+        });
+
+        // Inicializa a renderização dos pedidos recentes
+        if (typeof renderizarPedidosRecentes === "function") {
+             setTimeout(() => { // Pequeno delay para garantir que tudo carregou
+                renderizarPedidosRecentes();
+            }, 100);
+        }
+    });
+    </script>
+</body>
+</html>
