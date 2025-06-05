@@ -1,0 +1,135 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### OS-Specific ###
+# Linux/Unix
+*~
+.swp
+.directory
+.trash-*
+.nfs*
+
+# Windows
+Thumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.stackdump
+[Ll]ogs/
+
+### Editors & IDEs ###
+# Neovim
+*.swp
+*.swo
+*.swn
+*.un~
+.session.vim
+.tags
+.tags_sorted_by_file
+.tags.temp
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+### Java ###
+# Compiled
+*.class
+*.jar
+*.war
+*.ear
+
+# Build
+/target/
+/out/
+/bin/
+
+# Dependency management
+/.classpath
+/.project
+/.settings/
+*.iml
+/.idea/
+/.factorypath
+
+### Spring Boot ###
+# Logs
+*.log
+/logs/
+
+# Configuration
+/config/application*.properties
+
+### JavaScript/TypeScript ###
+node_modules/
+/dist/
+/.cache/
+/.parcel-cache/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.DS_Store
+
+# Build tool specific
+.eslintcache
+.pnp.*
+.yarn-integrity
+
+### Svelte & SvelteKit ###
+.svelte-kit/
+/build/
+/package/
+/.svelte/
+/.vercel/
+/.netlify/
+
+### PostgreSQL ###
+# Database files
+*.dump
+*.sql
+/data/
+/pgdata/
+/postgres-data/
+postgresql.log
+/postgres/
+/pg_log/
+*.pid
+
+# Connection config
+*.env
+.env.*
