@@ -1,5 +1,6 @@
 package com.lunarlog.controller;
 
+import com.lunarlog.dto.response.ShipmentTypeListResponseDTO;
 import com.lunarlog.dto.response.ShipmentTypeResponseDTO;
 import com.lunarlog.service.ShipmentTypeService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,13 @@ public class ShipmentTypeController {
 			@ApiResponse(responseCode = "404", description = "Shipment type not found")
 	})
 
+	@GetMapping("/tipo")
+	public ResponseEntity<ShipmentTypeListResponseDTO> getShipmentTypes() {
+
+		ShipmentTypeListResponseDTO shipmentTypes = shipmentTypeService.getAll();
+		return ResponseEntity.ok(shipmentTypes);
+	}
+
 	@GetMapping("/tipo/{typeName}")
 	public ResponseEntity<ShipmentTypeResponseDTO> getShipmentTypeByName(
 			@Parameter(description = "name of the shipment type to be retrieved", required = true) @PathVariable String typeName) {
@@ -35,4 +43,5 @@ public class ShipmentTypeController {
 		ShipmentTypeResponseDTO shipmentType = shipmentTypeService.findByName(typeName);
 		return ResponseEntity.ok(shipmentType);
 	}
+
 }

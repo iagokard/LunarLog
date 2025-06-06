@@ -1,5 +1,6 @@
 package com.lunarlog.service.impl;
 
+import com.lunarlog.dto.response.ShipmentTypeListResponseDTO;
 import com.lunarlog.dto.response.ShipmentTypeResponseDTO;
 import com.lunarlog.exception.ResourceNotFoundException;
 import com.lunarlog.mapper.ShipmentTypeMapper;
@@ -7,6 +8,9 @@ import com.lunarlog.model.ShipmentType;
 import com.lunarlog.repository.ShipmentTypeRepository;
 import com.lunarlog.service.ShipmentTypeService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +18,12 @@ import org.springframework.stereotype.Service;
 public class ShipmentTypeServiceImpl implements ShipmentTypeService {
 
 	private final ShipmentTypeRepository shipmentTypeRepository;
+
+	@Override
+	public ShipmentTypeListResponseDTO getAll() {
+		List<ShipmentType> shipmentTypes = shipmentTypeRepository.findByIsDeletedFalse();
+		return new ShipmentTypeListResponseDTO(shipmentTypes);
+	}
 
 	@Override
 	public ShipmentTypeResponseDTO findByName(String name) {
