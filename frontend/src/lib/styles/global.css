@@ -1,0 +1,19 @@
+html {
+    scroll-behavior: smooth;
+}
+
+input {
+    border-color: #e5e7eb;
+}
+
+main {
+    background-color: #fefefe;
+}
+
+.border-fix {
+    border-color: #e5e7eb;
+}
+
+.border-fix * {
+    border-color: #e5e7eb;
+}
