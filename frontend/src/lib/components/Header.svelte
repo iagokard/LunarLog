@@ -12,6 +12,7 @@
 		<a href="#calculadora" class="hover:text-indigo-600"
 			>Calculadora de Frete</a
 		>
+		<a href="/envio">Enviar pacote</a>
 		<a href="#sobre" class="hover:text-indigo-600">Sobre Nós</a>
 	</nav>
 
