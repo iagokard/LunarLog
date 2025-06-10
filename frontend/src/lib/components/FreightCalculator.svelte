@@ -177,10 +177,12 @@
 
 			// Calcular frete
 			let freightValue =
-				effectiveWeight * selectedShipmentType.freightPerWeight +
+				effectiveWeight *
+					(selectedShipmentType.freightPerWeight / 1000) +
 				effectiveDistance *
 					(selectedShipmentType.freightPerDistance / 1000) +
-				effectiveVolume * selectedShipmentType.freightPerVolume;
+				effectiveVolume *
+					(selectedShipmentType.freightPerVolume / 1000);
 
 			// Garantir valor mínimo
 			freightValue = Math.max(0, freightValue);

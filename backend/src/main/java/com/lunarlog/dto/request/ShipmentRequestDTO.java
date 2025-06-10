@@ -1,16 +1,20 @@
 package com.lunarlog.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
 public record ShipmentRequestDTO(
-		@NotBlank @Size(max = 20) String trackingCode,
-		@NotBlank @Size(max = 50) String keyword,
-		@NotNull Long senderId,
-		@NotNull Long receiverId,
-		@NotNull Long packageId,
-		@NotNull Long shipmentTypeId,
-		@NotNull Long originLocationId,
-		@NotNull Long destinationLocationId,
+		@NotNull @Valid ParticipantRequestDTO sender,
+		@NotNull @Valid ParticipantRequestDTO receiver,
+
+		@NotNull @Valid PackageRequestDTO packageEntity,
+
+		@NotBlank @Valid String shipmentType,
+
+		@NotNull @Valid LocationRequestDTO originLocation,
+		@NotNull @Valid LocationRequestDTO destinationLocation,
+
 		@NotNull @Positive Integer freightValue,
-		Long deliveryPersonId) {
+		Long deliveryPersonId // Pode ser nulo
+) {
 }

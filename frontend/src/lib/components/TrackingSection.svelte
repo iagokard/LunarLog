@@ -145,7 +145,7 @@
 
 		{#if error?.status === 404}
 			<p class="text-red-500 text-sm mt-2">
-				{error.message} - Código: "{trackingCodeUsed}"
+				Pacote com código "{trackingCodeUsed}" não encontrado
 			</p>
 		{/if}
 	</div>

@@ -8,7 +8,6 @@
 </script>
 
 <main class="font-sans">
-	<Header />
 	<Hero />
 	<TrackingSection />
 	<FreightCalculator />

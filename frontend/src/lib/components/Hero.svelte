@@ -16,19 +16,19 @@
 		</p>
 
 		<!-- Campo de rastreamento -->
-		<form class="flex flex-col sm:flex-row items-center gap-4 mt-4">
-			<input
-				type="text"
-				placeholder="Ex: AA123456789BR"
-				class="w-full sm:w-auto flex-1 px-4 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500"
-			/>
-			<button
-				type="submit"
-				class="bg-pink-500 text-white px-6 py-2 rounded-md hover:bg-pink-600 transition"
-			>
-				Rastrear
-			</button>
-		</form>
+		<!-- <form class="flex flex-col sm:flex-row items-center gap-4 mt-4"> -->
+		<!-- 	<input -->
+		<!-- 		type="text" -->
+		<!-- 		placeholder="Ex: AA123456789BR" -->
+		<!-- 		class="w-full sm:w-auto flex-1 px-4 py-2 border border-pink-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500" -->
+		<!-- 	/> -->
+		<!-- 	<button -->
+		<!-- 		type="submit" -->
+		<!-- 		class="bg-pink-500 text-white px-6 py-2 rounded-md hover:bg-pink-600 transition" -->
+		<!-- 	> -->
+		<!-- 		Rastrear -->
+		<!-- 	</button> -->
+		<!-- </form> -->
 	</div>
 
 	<!-- Imagem ilustrativa -->

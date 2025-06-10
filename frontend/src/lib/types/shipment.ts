@@ -25,3 +25,29 @@ export interface ApiError {
 	path?: string;
 	timestamp?: string;
 }
+
+export interface Address {
+	name: string;
+	cpf: string;
+	email: string;
+	phone: string;
+	cep: string;
+	street: string;
+	number: string;
+	complement?: string;
+	neighborhood: string;
+	city: string;
+	state: string;
+}
+
+export interface Dimensions {
+	weight: number | null;
+	height: number | null;
+	width: number | null;
+	length: number | null;
+}
+
+export interface FreightResponse {
+	value: number;
+	estimatedDelivery: string;
+}
